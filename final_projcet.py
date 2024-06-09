@@ -7,15 +7,15 @@ Original file is located at
     https://colab.research.google.com/drive/1AMuxVvXBBNkSvWiDk2r04Ivt3vOTRiii
 """
 
+# app.py
+
 import pandas as pd
 import streamlit as st
 from bokeh.plotting import figure
-from bokeh.models import ColumnDataSource
-from pyngrok import ngrok
 
 # Load data
-
-pizza_sales_data = pd.read_csv('finalproject_Pizza.csv')
+file_path = 'finalproject_Pizza.csv'
+pizza_sales_data = pd.read_csv(file_path)
 
 # Data preprocessing
 pizza_sales_data['date'] = pd.to_datetime(pizza_sales_data['date'])
@@ -59,3 +59,6 @@ def app():
     p4.xgrid.grid_line_color = None
     p4.y_range.start = 0
     st.bokeh_chart(p4, use_container_width=True)
+
+if __name__ == "__main__":
+    app()
