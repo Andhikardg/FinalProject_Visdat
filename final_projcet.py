@@ -7,69 +7,55 @@ Original file is located at
     https://colab.research.google.com/drive/1AMuxVvXBBNkSvWiDk2r04Ivt3vOTRiii
 """
 
-import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
+import streamlit as st
+from bokeh.plotting import figure
+from bokeh.models import ColumnDataSource
+from pyngrok import ngrok
 
-# Load the data
-data = pd.read_csv('finalproject_Pizza.csv')
+# Load data
 
-# Convert the date column to datetime
-data['date'] = pd.to_datetime(data['date'])
+pizza_sales_data = pd.read_csv('finalproject_Pizza.csv')
 
-# Sidebar for filtering
-st.sidebar.header('Filter Options')
-date_range = st.sidebar.date_input('Select Date Range:', [data['date'].min(), data['date'].max()])
-selected_type = st.sidebar.multiselect('Select Pizza Type:', options=data['type'].unique(), default=data['type'].unique())
-selected_size = st.sidebar.multiselect('Select Pizza Size:', options=data['size'].unique(), default=data['size'].unique())
+# Data preprocessing
+pizza_sales_data['date'] = pd.to_datetime(pizza_sales_data['date'])
+pizza_sales_data['month'] = pizza_sales_data['date'].dt.to_period('M')
 
-# Filter data based on selections
-filtered_data = data[(data['date'] >= pd.to_datetime(date_range[0])) &
-                    (data['date'] <= pd.to_datetime(date_range[1])) &
-                    (data['type'].isin(selected_type)) &
-                    (data['size'].isin(selected_size))]
+# Streamlit app
+def app():
+    st.title("Pizza Sales Dashboard")
 
-# Title
-st.title('Pizza Sales Analysis')
+    # Sales Over Time
+    st.header("Total Sales Over Time")
+    sales_over_time = pizza_sales_data.groupby('month').agg({'price': 'sum'}).reset_index()
+    p1 = figure(x_axis_type='datetime', title="Total Sales Over Time")
+    p1.line(sales_over_time['month'].astype(str), sales_over_time['price'], line_width=2)
+    st.bokeh_chart(p1, use_container_width=True)
 
-# Total sales over time
-st.subheader('Total Sales Over Time')
-sales_over_time = filtered_data.groupby('date')['price'].sum().reset_index()
-fig, ax = plt.subplots()
-ax.plot(sales_over_time['date'], sales_over_time['price'])
-ax.set_xlabel('Date')
-ax.set_ylabel('Total Sales')
-ax.set_title('Total Sales Over Time')
-st.pyplot(fig)
+    # Popular Pizzas
+    st.header("Most Popular Pizzas")
+    popular_pizzas = pizza_sales_data['name'].value_counts().reset_index()
+    popular_pizzas.columns = ['name', 'count']
+    p2 = figure(x_range=popular_pizzas['name'], title="Most Popular Pizzas")
+    p2.vbar(x=popular_pizzas['name'], top=popular_pizzas['count'], width=0.9)
+    p2.xgrid.grid_line_color = None
+    p2.y_range.start = 0
+    st.bokeh_chart(p2, use_container_width=True)
 
-# Sales by pizza type and size
-st.subheader('Sales by Pizza Type and Size')
-sales_by_type_size = filtered_data.groupby(['type', 'size'])['price'].sum().unstack().fillna(0)
-fig, ax = plt.subplots()
-sales_by_type_size.plot(kind='bar', stacked=True, ax=ax)
-ax.set_xlabel('Pizza Type')
-ax.set_ylabel('Total Sales')
-ax.set_title('Sales by Pizza Type and Size')
-st.pyplot(fig)
+    # Sales by Pizza Type
+    st.header("Sales by Pizza Type")
+    sales_by_type = pizza_sales_data.groupby('type').agg({'price': 'sum'}).reset_index()
+    p3 = figure(x_range=sales_by_type['type'], title="Sales by Pizza Type")
+    p3.vbar(x=sales_by_type['type'], top=sales_by_type['price'], width=0.9)
+    p3.xgrid.grid_line_color = None
+    p3.y_range.start = 0
+    st.bokeh_chart(p3, use_container_width=True)
 
-# Histogram of pizza prices
-st.subheader('Distribution of Pizza Prices')
-fig, ax = plt.subplots()
-sns.histplot(filtered_data['price'], bins=10, ax=ax)
-ax.set_xlabel('Price')
-ax.set_ylabel('Count')
-ax.set_title('Distribution of Pizza Prices')
-st.pyplot(fig)
-
-# Pie chart of sales by pizza type
-st.subheader('Sales Proportion by Pizza Type')
-sales_by_type = filtered_data.groupby('type')['price'].sum().reset_index()
-fig, ax = plt.subplots()
-ax.pie(sales_by_type['price'], labels=sales_by_type['type'], autopct='%1.1f%%')
-ax.set_title('Sales Proportion by Pizza Type')
-st.pyplot(fig)
-
-# Display filtered data
-st.subheader('Filtered Data')
-st.write(filtered_data)
+    # Sales by Pizza Size
+    st.header("Sales by Pizza Size")
+    sales_by_size = pizza_sales_data.groupby('size').agg({'price': 'sum'}).reset_index()
+    p4 = figure(x_range=sales_by_size['size'], title="Sales by Pizza Size")
+    p4.vbar(x=sales_by_size['size'], top=sales_by_size['price'], width=0.9)
+    p4.xgrid.grid_line_color = None
+    p4.y_range.start = 0
+    st.bokeh_chart(p4, use_container_width=True)
