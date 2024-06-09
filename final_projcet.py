@@ -11,7 +11,7 @@ import pandas as pd
 import streamlit as st
 from bokeh.plotting import figure
 from bokeh.io import show
-from bokeh.models import ColumnDataSource
+from bokeh.models import ColumnDataSource, DatetimeTickFormatter
 from bokeh.layouts import column
 
 # Load data
@@ -32,12 +32,24 @@ daily_sales = pizza_sales_data.groupby('day').agg({'price': 'sum'}).reset_index(
 def final_projcet():
     st.title("Pizza Sales Dashboard")
 
-    # Sales Over Time
+    # Filter by date range
+    start_date = st.date_input("Start date", min_value=pd.to_datetime(pizza_sales_data['date']).min(), max_value=pd.to_datetime(pizza_sales_data['date']).max())
+    end_date = st.date_input("End date", min_value=pd.to_datetime(pizza_sales_data['date']).min(), max_value=pd.to_datetime(pizza_sales_data['date']).max())
+
+    # Convert start_date and end_date to pandas datetime
+    start_date = pd.to_datetime(start_date)
+    end_date = pd.to_datetime(end_date)
+
+    # Filter sales data
+    filtered_sales = pizza_sales_data[(pizza_sales_data['date'] >= start_date) & (pizza_sales_data['date'] <= end_date)]
+
     # Daily Sales Line Chart
     st.header("Daily Sales")
-    source = ColumnDataSource(daily_sales)
+    daily_sales_filtered = filtered_sales.groupby('day').agg({'price': 'sum'}).reset_index()
+    source = ColumnDataSource(daily_sales_filtered)
     p = figure(x_axis_type='datetime', title="Daily Sales", plot_height=400, plot_width=700)
     p.line(x='day', y='price', source=source, line_width=2)
+    p.xaxis.formatter=DatetimeTickFormatter(months=["%b %Y"])
 
     # Display the chart
     st.bokeh_chart(p, use_container_width=True)
@@ -68,7 +80,7 @@ def final_projcet():
     p4.y_range.start = 0
 
     # Display the charts
-    st.bokeh_chart(p1, use_container_width=True)
+    # st.bokeh_chart(p1, use_container_width=True)
     st.bokeh_chart(p2, use_container_width=True)
     st.bokeh_chart(p3, use_container_width=True)
     st.bokeh_chart(p4, use_container_width=True)
