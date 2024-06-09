@@ -23,7 +23,7 @@ pizza_sales_data['date'] = pd.to_datetime(pizza_sales_data['date'])
 pizza_sales_data['month'] = pizza_sales_data['date'].dt.to_period('M')
 
 # Streamlit app
-def app():
+def final_projcet():
     st.title("Pizza Sales Dashboard")
 
     # Sales Over Time
@@ -62,3 +62,6 @@ def app():
     st.bokeh_chart(p2, use_container_width=True)
     st.bokeh_chart(p3, use_container_width=True)
     st.bokeh_chart(p4, use_container_width=True)
+
+if __name__ == "__main__":
+    final_projcet()
