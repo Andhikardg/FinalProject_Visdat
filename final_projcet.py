@@ -62,6 +62,3 @@ def app():
     st.bokeh_chart(p2, use_container_width=True)
     st.bokeh_chart(p3, use_container_width=True)
     st.bokeh_chart(p4, use_container_width=True)
-
-if __name__ == "__main__":
-    app()
