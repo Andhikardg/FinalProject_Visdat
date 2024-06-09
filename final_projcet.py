@@ -7,15 +7,13 @@ Original file is located at
     https://colab.research.google.com/drive/1AMuxVvXBBNkSvWiDk2r04Ivt3vOTRiii
 """
 
-!gdown --id 16SX_ZUz9INVKY-h9j08PzuaQlAvFHVt2
-
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Load the data
-data = pd.read_csv('/content/finalproject_Pizza.csv')
+data = pd.read_csv('finalproject_Pizza.csv')
 
 # Convert the date column to datetime
 data['date'] = pd.to_datetime(data['date'])
