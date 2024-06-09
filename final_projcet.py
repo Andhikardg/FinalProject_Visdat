@@ -7,11 +7,12 @@ Original file is located at
     https://colab.research.google.com/drive/1AMuxVvXBBNkSvWiDk2r04Ivt3vOTRiii
 """
 
-# app.py
-
 import pandas as pd
 import streamlit as st
 from bokeh.plotting import figure
+from bokeh.io import show
+from bokeh.models import ColumnDataSource
+from bokeh.layouts import column
 
 # Load data
 file_path = 'finalproject_Pizza.csv'
@@ -29,8 +30,7 @@ def app():
     st.header("Total Sales Over Time")
     sales_over_time = pizza_sales_data.groupby('month').agg({'price': 'sum'}).reset_index()
     p1 = figure(x_axis_type='datetime', title="Total Sales Over Time")
-    p1.line(sales_over_time['month'].astype(str), sales_over_time['price'], line_width=2)
-    st.bokeh_chart(p1, use_container_width=True)
+    p1.line(x=sales_over_time['month'].astype(str), y=sales_over_time['price'], line_width=2)
 
     # Popular Pizzas
     st.header("Most Popular Pizzas")
@@ -40,7 +40,6 @@ def app():
     p2.vbar(x=popular_pizzas['name'], top=popular_pizzas['count'], width=0.9)
     p2.xgrid.grid_line_color = None
     p2.y_range.start = 0
-    st.bokeh_chart(p2, use_container_width=True)
 
     # Sales by Pizza Type
     st.header("Sales by Pizza Type")
@@ -49,7 +48,6 @@ def app():
     p3.vbar(x=sales_by_type['type'], top=sales_by_type['price'], width=0.9)
     p3.xgrid.grid_line_color = None
     p3.y_range.start = 0
-    st.bokeh_chart(p3, use_container_width=True)
 
     # Sales by Pizza Size
     st.header("Sales by Pizza Size")
@@ -58,6 +56,11 @@ def app():
     p4.vbar(x=sales_by_size['size'], top=sales_by_size['price'], width=0.9)
     p4.xgrid.grid_line_color = None
     p4.y_range.start = 0
+
+    # Display the charts
+    st.bokeh_chart(p1, use_container_width=True)
+    st.bokeh_chart(p2, use_container_width=True)
+    st.bokeh_chart(p3, use_container_width=True)
     st.bokeh_chart(p4, use_container_width=True)
 
 if __name__ == "__main__":
