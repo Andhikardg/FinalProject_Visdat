@@ -19,18 +19,28 @@ file_path = 'finalproject_Pizza.csv'
 pizza_sales_data = pd.read_csv(file_path)
 
 # Data preprocessing
+# pizza_sales_data['date'] = pd.to_datetime(pizza_sales_data['date'])
+# pizza_sales_data['month'] = pizza_sales_data['date'].dt.to_period('M')
+
 pizza_sales_data['date'] = pd.to_datetime(pizza_sales_data['date'])
-pizza_sales_data['month'] = pizza_sales_data['date'].dt.to_period('M')
+pizza_sales_data['day'] = pizza_sales_data['date'].dt.date
+
+# Aggregate sales by day
+daily_sales = pizza_sales_data.groupby('day').agg({'price': 'sum'}).reset_index()
 
 # Streamlit app
 def final_projcet():
     st.title("Pizza Sales Dashboard")
 
     # Sales Over Time
-    st.header("Total Sales Over Time")
-    sales_over_time = pizza_sales_data.groupby('month').agg({'price': 'sum'}).reset_index()
-    p1 = figure(x_axis_type='datetime', title="Total Sales Over Time")
-    p1.line(x=sales_over_time['month'].astype(str), y=sales_over_time['price'], line_width=2)
+    # Daily Sales Line Chart
+    st.header("Daily Sales")
+    source = ColumnDataSource(daily_sales)
+    p = figure(x_axis_type='datetime', title="Daily Sales", plot_height=400, plot_width=700)
+    p.line(x='day', y='price', source=source, line_width=2)
+
+    # Display the chart
+    st.bokeh_chart(p, use_container_width=True)
 
     # Popular Pizzas
     st.header("Most Popular Pizzas")
